@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard EMSERH - Rede de Saúde Materno-Infantil do Maranhão</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+            min-height: 100vh;
+            color: #f8fafc;
+            overflow-x: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #0d4c4f 0%, #0a393c 100%);
+            color: white;
+            padding: 2rem 0;
+            box-shadow: 0 4px 20px rgba(13, 76, 79, 0.4);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="20" cy="20" r="2" fill="rgba(255,255,255,0.1)"/><circle cx="80" cy="30" r="1.5" fill="rgba(255,255,255,0.1)"/><circle cx="40" cy="70" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="90" cy="80" r="2.5" fill="rgba(255,255,255,0.1)"/></svg>');
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header-content {
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            background: linear-gradient(45deg, #ffffff, #e2e8f0);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header p {
+            font-size: 1.4rem;
+            opacity: 0.9;
+            font-weight: 300;
+            margin-bottom: 1rem;
+        }
+
+        .emserh-logo {
+            display: inline-block;
+            padding: 0.5rem 1.2rem;
+            background: rgba(255,255,255,0.15);
+            border-radius: 25px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            letter-spacing: 2px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .dashboard {
+            padding: 3rem 0;
+        }
+
+        .main-layout {
+            display: flex;
+            gap: 2rem;
+            height: calc(100vh - 200px);
+        }
+
+        .sidebar {
+            width: 300px;
+            background: rgba(15, 23, 42, 0.95);
+            border-radius: 15px;
+            padding: 1.5rem;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            overflow-y: auto;
+        }
+
+        .filter-section {
+            margin-bottom: 2rem;
+        }
+
+        .filter-section h3 {
+            color: #60a5fa;
+            font-size: 1.1rem;
+            margin-bottom: 0.8rem;
+            font-weight: 600;
+        }
+
+        .filter-section select {
+            width: 100%;
+            padding: 0.75rem;
+            background: rgba(30, 41, 59, 0.8);
+            border: 1px solid rgba(148, 163, 184, 0.3);
+            border-radius: 8px;
+            color: white;
+            font-size: 0.9rem;
+        }
+
+        .upcoming-section h3 {
+            color: #f1f5f9;
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .unit-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+        }
+
+        .unit-item {
+            background: rgba(30, 41, 59, 0.6);
+            border-radius: 10px;
+            padding: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(148, 163, 184, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .unit-item:hover {
+            background: rgba(30, 41, 59, 0.8);
+            transform: translateX(5px);
+            border-color: rgba(59, 130, 246, 0.3);
+        }
+
+        .unit-info {
+            flex: 1;
+        }
+
+        .patient-name {
+            color: #f1f5f9;
+            font-weight: 600;
+            font-size: 0.9rem;
+            margin-bottom: 0.3rem;
+        }
+
+        .doctor-name {
+            color: #94a3b8;
+            font-size: 0.8rem;
+        }
+
+        .time {
+            font-size: 0.7rem;
+            font-weight: 600;
+            padding: 0.3rem 0.6rem;
+            border-radius: 12px;
+            background: rgba(148, 163, 184, 0.2);
+            color: #f1f5f9;
+        }
+
+        .main-content {
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .kpi-row {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .kpi-card {
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 1.2rem;
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .kpi-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+        }
+
+        .kpi-card.blue { border-left: 4px solid #3b82f6; }
+        .kpi-card.green { border-left: 4px solid #10b981; }
+        .kpi-card.purple { border-left: 4px solid #8b5cf6; }
+        .kpi-card.orange { border-left: 4px solid #f59e0b; }
+        .kpi-card.red { border-left: 4px solid #ef4444; }
+        .kpi-card.cyan { border-left: 4px solid #06b6d4; }
+
+        .kpi-icon {
+            font-size: 1.8rem;
+            opacity: 0.8;
+            margin-bottom: 0.5rem;
+        }
+
+        .kpi-number {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #f1f5f9;
+            margin-bottom: 0.3rem;
+        }
+
+        .kpi-label {
+            font-size: 0.8rem;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .charts-row {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 2rem;
+        }
+
+        .chart-card, .patient-card {
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 1.5rem;
+            border: 1px solid rgba(148, 163, 184, 0.2);
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .chart-header h3 {
+            color: #f1f5f9;
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .chart-subtitle {
+            color: #10b981;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .legend-container {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #94a3b8;
+            font-size: 0.8rem;
+        }
+
+        .legend-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        .legend-dot.blue { background: #3b82f6; }
+        .legend-dot.green { background: #10b981; }
+
+        .chart-canvas {
+            height: 300px;
+            position: relative;
+        }
+
+        .chart-canvas canvas {
+            width: 100% !important;
+            height: 100% !important;
+        }
+
+        .footer {
+            background: rgba(15, 23, 42, 0.9);
+            padding: 2rem 0;
+            text-align: center;
+            border-top: 1px solid rgba(148, 163, 184, 0.2);
+            backdrop-filter: blur(10px);
+        }
+
+        .footer p {
+            color: #94a3b8;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 1200px) {
+            .main-layout {
+                flex-direction: column;
+                height: auto;
+            }
+            
+            .sidebar {
+                width: 100%;
+                height: auto;
+            }
+            
+            .kpi-row {
+                grid-template-columns: repeat(3, 1fr);
+            }
+            
+            .charts-row {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .kpi-row {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .unit-item {
+                flex-direction: column;
+                text-align: center;
+                gap: 0.5rem;
+            }
+            
+            .chart-header {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .kpi-row {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="container">
+            <div class="header-content">
+                <h1>Rede EMSERH</h1>
+                <p>Sistema Integrado de Monitoramento de Indicadores Materno-Infantis</p>
+                <div class="emserh-logo">MARANHÃO</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container dashboard">
+        <!-- Sidebar com Filtros e Navegação -->
+        <div class="main-layout">
+            <div class="sidebar">                
+                <div class="upcoming-section">
+                    <h3>🏥 Unidades EMSERH</h3>
+                    <div class="unit-list">
+                        <div class="unit-item" onclick="window.open('dashboard_mari.html', '_blank')">
+                            <div class="unit-info">
+                                <div class="patient-name">MARI - Imperatriz</div>
+                                <div class="doctor-name">Alto Risco • 525/mês</div>
+                            </div>
+                            <div class="time">🔄 MELHORANDO</div>
+                        </div>
+                        
+                        <div class="unit-item" onclick="window.open('dashboard_alto_alegre.html', '_blank')">
+                            <div class="unit-info">
+                                <div class="patient-name">H. Alto Alegre</div>
+                                <div class="doctor-name">Alto Volume • 143/mês</div>
+                            </div>
+                            <div class="time">📈 EVOLUINDO</div>
+                        </div>
+                        
+                        <div class="unit-item" onclick="window.open('dashboard_barreirinhas.html', '_blank')">
+                            <div class="unit-info">
+                                <div class="patient-name">H. Barreirinhas</div>
+                                <div class="doctor-name">Equilibrado • 120/mês</div>
+                            </div>
+                            <div class="time">✅ BOM</div>
+                        </div>
+                        
+                        <div class="unit-item" onclick="window.open('dashboard_coroata.html', '_blank')">
+                            <div class="unit-info">
+                                <div class="patient-name">Macroreg. Coroatá</div>
+                                <div class="doctor-name">Referência • 80/mês</div>
+                            </div>
+                            <div class="time">⚡ ESTÁVEL</div>
+                        </div>
+                        
+                        <div class="unit-item" onclick="window.open('dashboard_morros.html', '_blank')">
+                            <div class="unit-info">
+                                <div class="patient-name">H. Morros</div>
+                                <div class="doctor-name">Excelência • 24/mês</div>
+                            </div>
+                            <div class="time">🟢 IDEAL</div>
+                        </div>
+                        
+                        <div class="unit-item" onclick="window.open('dashboard_timon.html', '_blank')">
+                            <div class="unit-info">
+                                <div class="patient-name">H. Timon</div>
+                                <div class="doctor-name">Equilibrado • 220/mês</div>
+                            </div>
+                            <div class="time">✅ BOM</div>
+                        </div>
+                        
+                        <div class="unit-item" onclick="window.open('dashboard_santa_luzia_do_parua.html', '_blank')">
+                            <div class="unit-info">
+                                <div class="patient-name">Sta Luzia Paruá</div>
+                                <div class="doctor-name">Municipal • 102/mês</div>
+                            </div>
+                            <div class="time">🔄 PROGREDINDO</div>
+                        </div>
+                        
+                        <div class="unit-item" onclick="window.open('dashboard_itapecuru.html', '_blank')">
+                            <div class="unit-info">
+                                <div class="patient-name">H. Itapecuru</div>
+                                <div class="doctor-name">A. Matos Fonseca</div>
+                            </div>
+                            <div class="time">📊 ESTÁVEL</div>
+                        </div>
+                        
+                        <div class="unit-item" onclick="window.open('dashboard_timbiras.html', '_blank')">
+                            <div class="unit-info">
+                                <div class="patient-name">H. Timbiras</div>
+                                <div class="doctor-name">Regional • 35/mês</div>
+                            </div>
+                            <div class="time">📈 CRESCENDO</div>
+                        </div>
+                        
+                        <div class="unit-item" onclick="window.open('dashboard_paulino_neves.html', '_blank')">
+                            <div class="unit-info">
+                                <div class="patient-name">H. Paulino Neves</div>
+                                <div class="doctor-name">Baixo Volume • 14/mês</div>
+                            </div>
+                            <div class="time">🌱 DESENVOLVENDO</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="main-content">
+                <!-- KPIs Principais -->
+                <div class="kpi-row">
+                    <div class="kpi-card blue">
+                        <div class="kpi-icon">👨‍⚕️</div>
+                        <div class="kpi-number">10</div>
+                        <div class="kpi-label">Unidades</div>
+                    </div>
+                    
+                    <div class="kpi-card green">
+                        <div class="kpi-icon">👥</div>
+                        <div class="kpi-number">18.147</div>
+                        <div class="kpi-label">Nascimentos</div>
+                    </div>
+                    
+                    <div class="kpi-card purple">
+                        <div class="kpi-icon">👤</div>
+                        <div class="kpi-number">47.8%</div>
+                        <div class="kpi-label">Parto Normal</div>
+                    </div>
+                    
+                    <div class="kpi-card orange">
+                        <div class="kpi-icon">🎯</div>
+                        <div class="kpi-number">52.2%</div>
+                        <div class="kpi-label">Taxa Cesárea</div>
+                    </div>
+                    
+                    <div class="kpi-card red">
+                        <div class="kpi-icon">⚠️</div>
+                        <div class="kpi-number">0.89‰</div>
+                        <div class="kpi-label">Mort. Neonatal</div>
+                    </div>
+                    
+                    <div class="kpi-card cyan">
+                        <div class="kpi-icon">🔄</div>
+                        <div class="kpi-number">127</div>
+                        <div class="kpi-label">Transferências</div>
+                    </div>
+                </div>
+
+                <!-- Gráficos Principais -->
+                <div class="charts-row">
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <h3>Análise Mensal de Partos</h3>
+                            <span class="chart-subtitle">10% Maior que mês anterior</span>
+                        </div>
+                        <div class="chart-canvas">
+                            <canvas id="monthlyAnalysisChart"></canvas>
+                        </div>
+                    </div>
+                    
+                    <div class="patient-card">
+                        <div class="chart-header">
+                            <h3>Transferências</h3>
+                            <div class="legend-container">
+                                <div class="legend-item">
+                                    <span class="legend-dot blue"></span>
+                                    <span>Materna</span>
+                                </div>
+                                <div class="legend-item">
+                                    <span class="legend-dot green"></span>
+                                    <span>Neonatal</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="chart-canvas">
+                            <canvas id="transferChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <div class="container">
+            <p>&copy; 2025 EMSERH - Empresa Maranhense de Serviços Hospitalares | Sistema de Monitoramento Materno-Infantil</p>
+            <p>Dados atualizados em tempo real • Última atualização: Junho 2025</p>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <script>
+        // Dados consolidados de todas as unidades
+        const hospitalData = {
+            mari: { normal: 52.9, cesarea: 47.1, nascimentos: 525, status: 'alto_risco' },
+            alto_alegre: { normal: 36.6, cesarea: 63.4, nascimentos: 143, status: 'alto' },
+            barreirinhas: { normal: 51.7, cesarea: 48.3, nascimentos: 120, status: 'bom' },
+            coroata: { normal: 20.5, cesarea: 79.5, nascimentos: 80, status: 'critico' },
+            morros: { normal: 81.3, cesarea: 18.7, nascimentos: 24, status: 'ideal' },
+            timon: { normal: 50.8, cesarea: 49.2, nascimentos: 220, status: 'bom' },
+            santa_luzia: { normal: 53.1, cesarea: 46.9, nascimentos: 102, status: 'medio' },
+            itapecuru: { normal: 37.7, cesarea: 62.3, nascimentos: 89, status: 'medio' },
+            timbiras: { normal: 35.5, cesarea: 64.5, nascimentos: 35, status: 'medio' },
+            paulino_neves: { normal: 34.7, cesarea: 65.3, nascimentos: 14, status: 'critico' }
+        };
+
+        // Dados para gráfico mensal (simulado com base nos dados reais)
+        const monthlyData = {
+            labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'],
+            partoNormal: [48.2, 49.1, 47.8, 46.5, 48.9, 49.3, 47.1, 48.7, 49.2, 47.9, 48.4, 47.8],
+            cesarea: [51.8, 50.9, 52.2, 53.5, 51.1, 50.7, 52.9, 51.3, 50.8, 52.1, 51.6, 52.2],
+            nascimentos: [1520, 1480, 1650, 1590, 1710, 1640, 1580, 1620, 1540, 1680, 1560, 1510]
+        };
+
+        // Dados para gráfico de transferências
+        const transferData = {
+            labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun'],
+            transferMaterna: [12, 8, 15, 10, 14, 9],
+            transferNeonatal: [18, 22, 16, 20, 25, 19]
+        };
+
+        let monthlyChart = null;
+        let transferChart = null;
+
+        // Inicializar dashboard
+        function initDashboard() {
+            createMonthlyAnalysisChart();
+            createTransferChart();
+            animateKPIs();
+        }
+
+        // Gráfico de análise mensal
+        function createMonthlyAnalysisChart() {
+            const ctx = document.getElementById('monthlyAnalysisChart').getContext('2d');
+            
+            monthlyChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: monthlyData.labels,
+                    datasets: [
+                        {
+                            label: 'Parto Normal (%)',
+                            data: monthlyData.partoNormal,
+                            borderColor: '#10b981',
+                            backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                            borderWidth: 3,
+                            fill: true,
+                            tension: 0.4,
+                            pointBackgroundColor: '#10b981',
+                            pointBorderColor: '#ffffff',
+                            pointBorderWidth: 2,
+                            pointRadius: 5
+                        },
+                        {
+                            label: 'Cesárea (%)',
+                            data: monthlyData.cesarea,
+                            borderColor: '#f59e0b',
+                            backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                            borderWidth: 3,
+                            fill: true,
+                            tension: 0.4,
+                            pointBackgroundColor: '#f59e0b',
+                            pointBorderColor: '#ffffff',
+                            pointBorderWidth: 2,
+                            pointRadius: 5
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false,
+                            backgroundColor: 'rgba(15, 23, 42, 0.9)',
+                            titleColor: '#ffffff',
+                            bodyColor: '#ffffff',
+                            borderColor: '#3b82f6',
+                            borderWidth: 1
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            grid: {
+                                color: 'rgba(148, 163, 184, 0.1)',
+                                drawBorder: false
+                            },
+                            ticks: {
+                                color: '#94a3b8',
+                                callback: function(value) {
+                                    return value + '%';
+                                }
+                            }
+                        },
+                        x: {
+                            grid: {
+                                color: 'rgba(148, 163, 184, 0.1)',
+                                drawBorder: false
+                            },
+                            ticks: {
+                                color: '#94a3b8'
+                            }
+                        }
+                    },
+                    interaction: {
+                        intersect: false,
+                        mode: 'index'
+                    }
+                }
+            });
+        }
+
+        // Gráfico de transferências
+        function createTransferChart() {
+            const ctx = document.getElementById('transferChart').getContext('2d');
+            
+            transferChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: transferData.labels,
+                    datasets: [
+                        {
+                            label: 'Materna',
+                            data: transferData.transferMaterna,
+                            backgroundColor: 'rgba(59, 130, 246, 0.8)',
+                            borderColor: '#3b82f6',
+                            borderWidth: 1,
+                            borderRadius: 6,
+                            borderSkipped: false
+                        },
+                        {
+                            label: 'Neonatal',
+                            data: transferData.transferNeonatal,
+                            backgroundColor: 'rgba(16, 185, 129, 0.8)',
+                            borderColor: '#10b981',
+                            borderWidth: 1,
+                            borderRadius: 6,
+                            borderSkipped: false
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(15, 23, 42, 0.9)',
+                            titleColor: '#ffffff',
+                            bodyColor: '#ffffff',
+                            borderColor: '#3b82f6',
+                            borderWidth: 1
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(148, 163, 184, 0.1)',
+                                drawBorder: false
+                            },
+                            ticks: {
+                                color: '#94a3b8'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                color: 'rgba(148, 163, 184, 0.1)',
+                                drawBorder: false
+                            },
+                            ticks: {
+                                color: '#94a3b8'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Animar KPIs
+        function animateKPIs() {
+            const kpiNumbers = document.querySelectorAll('.kpi-number');
+            
+            kpiNumbers.forEach((element, index) => {
+                const finalValue = element.textContent;
+                element.textContent = '0';
+                
+                setTimeout(() => {
+                    if (finalValue.includes('%')) {
+                        const numValue = parseFloat(finalValue.replace('%', ''));
+                        animateValue(element, 0, numValue, 1500, '%');
+                    } else if (finalValue.includes('‰')) {
+                        const numValue = parseFloat(finalValue.replace('‰', ''));
+                        animateValue(element, 0, numValue, 1500, '‰');
+                    } else if (finalValue.includes('.')) {
+                        const numValue = parseInt(finalValue.replace(/[^\d]/g, ''));
+                        animateValue(element, 0, numValue, 2000, '');
+                    } else {
+                        const numValue = parseInt(finalValue);
+                        animateValue(element, 0, numValue, 2000, '');
+                    }
+                }, index * 200);
+            });
+        }
+
+        function animateValue(element, start, end, duration, suffix = '') {
+            let startTimestamp = null;
+            const step = (timestamp) => {
+                if (!startTimestamp) startTimestamp = timestamp;
+                const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+                const currentValue = Math.floor(progress * (end - start) + start);
+                
+                if (suffix === '%') {
+                    element.textContent = currentValue.toFixed(1) + '%';
+                } else if (suffix === '‰') {
+                    element.textContent = (currentValue / 100).toFixed(2) + '‰';
+                } else if (end > 1000) {
+                    element.textContent = currentValue.toLocaleString() + suffix;
+                } else {
+                    element.textContent = currentValue + suffix;
+                }
+                
+                if (progress < 1) {
+                    window.requestAnimationFrame(step);
+                }
+            };
+            window.requestAnimationFrame(step);
+        }
+
+        // Inicializar quando carregar
+        document.addEventListener('DOMContentLoaded', function() {
+            initDashboard();
+            
+            // Animar entrada dos elementos
+            const cards = document.querySelectorAll('.kpi-card, .chart-card, .patient-card, .unit-item');
+            cards.forEach((card, index) => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(20px)';
+                setTimeout(() => {
+                    card.style.transition = 'all 0.6s ease';
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, index * 100);
+            });
+        });
+
+        console.log('🏥 Sistema EMSERH - Dashboard Principal Carregado');
+        console.log('📊 Total de unidades monitoradas: 10');
+        console.log('🎯 Sistema de monitoramento materno-infantil ativo');
+    </script>
+</body>
+</html>
